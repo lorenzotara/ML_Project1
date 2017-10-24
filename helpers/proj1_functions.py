@@ -17,7 +17,7 @@ def compute_gradient(y, tx, w):
     return gradient, compute_mse(y, tx, w)
 
 
-def gradient_descent(y, tx, initial_w, max_iters, gamma):
+def linear_regression(y, tx, initial_w, max_iters, gamma):
     """Gradient descent algorithm."""
     # Define parameters to store w and loss
     ws = [initial_w]
