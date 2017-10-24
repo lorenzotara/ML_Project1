@@ -42,21 +42,31 @@ def replace_wrong_data(x):
 
     new_x = x
 
-    tx = delete_bad_rows(x)
+    tx = []
+    # Every element of tx is a column of x without the wrong data
+    for i in range(len(x[0])):
 
+        tx.append(np.delete(x[:, i], np.argwhere(x[:, i] == -999)))
+
+    # Calculating the mean of every column not taking account of the wrong data
+    # and then putting it instead of the wrong datum
     for i in range(len(new_x[0])):
 
         mean = np.mean(tx[i])
 
-        bad_indices = []
-        for j in range(len(new_x)):
-            if new_x[j, i] == -999:
-                bad_indices.append(j)
+        new_x[np.argwhere(new_x[:, i] == -999), i] = mean
 
-        # print("\n\nBad Indices")
-        # print(len(bad_indices))
+    return new_x
 
-        np.put(new_x[:, i], bad_indices, mean)
+
+def features_standardization(x):
+
+    new_x = x
+
+    for i in range(len(new_x[0])):
+
+        # Dividing by the standard deviation
+        new_x[:, i] = (new_x[:, i] - np.mean(new_x[:, i])) / np.std(new_x[:, i])
 
     return new_x
 
@@ -66,6 +76,7 @@ def features_normalization(x):
     new_x = x
 
     for i in range(len(new_x[0])):
+        # Dividing by the difference between the maximum and the minimum
         new_x[:, i] = (new_x[:, i] - np.mean(new_x[:, i])) / (np.max(new_x[:, i]) - np.min(new_x[:, i]))
 
     return new_x

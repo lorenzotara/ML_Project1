@@ -13,8 +13,54 @@ def compute_gradient(y, tx, w):
     """Compute the gradient."""
 
     e = y - tx.dot(w)
+    loss = e.dot(e) / (2 * len(e))
     gradient = - (1 / len(y)) * tx.T.dot(e)
-    return gradient, compute_mse(y, tx, w)
+    return gradient, loss
+
+
+def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
+    """
+    Generate a minibatch iterator for a dataset.
+    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
+    Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
+    Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
+    Example of use :
+    for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
+        <DO-SOMETHING>
+    """
+    data_size = len(y)
+
+    if shuffle:
+        shuffle_indices = np.random.permutation(np.arange(data_size))
+        shuffled_y = y[shuffle_indices]
+        shuffled_tx = tx[shuffle_indices]
+    else:
+        shuffled_y = y
+        shuffled_tx = tx
+    for batch_num in range(num_batches):
+        start_index = batch_num * batch_size
+        end_index = min((batch_num + 1) * batch_size, data_size)
+        if start_index != end_index:
+            yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
+
+
+def mini_batch_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma):
+    """Stochastic gradient descent algorithm."""
+
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+
+        for minibatch_y, minibatch_tx in batch_iter(y, tx, batch_size):
+            gradient, loss = compute_gradient(minibatch_y, minibatch_tx, w)
+
+            w = w - gamma * gradient
+            ws.append(w)
+            losses.append(loss)
+
+    return losses, ws
 
 
 def linear_regression(y, tx, initial_w, max_iters, gamma):
@@ -150,22 +196,24 @@ def lr_compute_loss(y, tx, w):
 def lr_compute_gradient(y, tx, w):
     """compute the gradient of loss."""
     sig = sigmoid(tx.dot(w))
+    gradient = tx.T.dot(sig - y)
+    loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig))
 
-    return tx.T.dot(sig - y)
+    return gradient, loss
 
 
-def lr_gradient_descent(y, tx, w, gamma):
-    """
-    Do one step of gradient descent using logistic regression.
-    Return the loss and the updated w.
-    """
-    loss = lr_compute_loss(y, tx, w)
-
-    gradient = lr_compute_gradient(y, tx, w)
-
-    w -= gamma * gradient
-
-    return loss, w
+# def lr_gradient_descent(y, tx, w, gamma):
+#     """
+#     Do one step of gradient descent using logistic regression.
+#     Return the loss and the updated w.
+#     """
+#     # loss = lr_compute_loss(y, tx, w)
+#
+#     gradient, loss = lr_compute_gradient(y, tx, w)
+#
+#     w -= gamma * gradient
+#
+#     return loss, w
 
 
 def hessian(tx, w):
@@ -182,6 +230,24 @@ def logistic_regression(y, tx, w):
     """return the loss, gradient, and hessian."""
 
     return lr_compute_loss(y, tx, w), lr_compute_gradient(y, tx, w), hessian(tx, w)
+
+
+def logistic_regression2(y, tx, initial_w, max_iters, gamma):
+    ws = [initial_w]
+    losses = []
+    w = initial_w
+
+    for n_iter in range(max_iters):
+        gradient, loss = lr_compute_gradient(y, tx, w)
+
+        w -= gamma * gradient
+        ws.append(w)
+        losses.append(loss)
+
+        print("Logistic Gradient Descent({bi}/{ti}): loss={l}".format(
+            bi=n_iter, ti=max_iters - 1, l=loss))
+
+    return losses, w
 
 
 def newton_method(y, tx, w):
