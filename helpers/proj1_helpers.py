@@ -2,6 +2,8 @@
 """some helper functions for project 1."""
 import csv
 import numpy as np
+from matplotlib import pyplot as plt
+from helpers.proj1_functions import *
 
 
 def load_csv_data(data_path, sub_sample=False):
@@ -31,6 +33,37 @@ def predict_labels(weights, data):
     y_pred[np.where(y_pred > 0)] = 1
     
     return y_pred
+
+
+def plot_gamma_parameter(x_train, y_train, x_test, y_test, max_iters, initial_w, gamma_start=0, gamma_end=10, step_size=1):
+
+    axis_x = []
+    axis_y = []
+
+    for gamma in range(gamma_start, gamma_end, step_size):
+
+        losses, ws = linear_regression(y_train, x_train, initial_w, max_iters, gamma / 100)
+
+        y_pred = predict_labels(ws, x_test)
+
+        final_result = y_test == y_pred
+
+        score = np.count_nonzero(final_result) / len(final_result)
+
+        axis_x.append(gamma / 100)
+        axis_y.append(score)
+
+        print(score * 100, "%")
+
+    print("\n\n\n")
+    print(axis_y)
+    print(axis_x)
+
+    plt.figure()
+    plt.plot(axis_x, axis_y)
+    plt.xlabel("gamma")
+    plt.ylabel("score")
+    plt.show()
 
 
 def create_csv_submission(ids, y_pred, name):
