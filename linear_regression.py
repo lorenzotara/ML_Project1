@@ -1,7 +1,6 @@
-from helpers.data_analysis import *
-from helpers.proj1_functions import *
-from helpers.proj1_helpers import *
 from matplotlib import pyplot as plt
+from helpers.proj1_helpers import *
+from helpers.data_analysis import *
 
 train_path = "Data/train.csv"
 test_path = "Data/test.csv"
@@ -16,7 +15,6 @@ Uncomment when you want to submit
 # x_test = replace_wrong_data(x_test)
 # x_test = build_poly(x_test, 3)
 # x_test[:, 1:len(x)] = features_standardization(x_test[:, 1:len(x)])
-
 
 
 ######## DATA ANALYSIS ###########
