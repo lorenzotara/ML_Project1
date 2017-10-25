@@ -27,15 +27,16 @@ def delete_bad_columns(x):
     return tx
 
 
-def delete_bad_rows(x):
+def delete_bad_rows(x, y):
 
     bad_rows = []
+
     for i in range(len(x)):
 
         if -999 in x[i]:
             bad_rows.append(i)
 
-    return np.delete(x, bad_rows, 0)
+    return np.delete(x, bad_rows, 0), np.delete(y, bad_rows)
 
 
 def replace_wrong_data(x):

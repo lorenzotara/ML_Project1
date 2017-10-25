@@ -84,13 +84,30 @@ def linear_regression(y, tx, initial_w, max_iters, gamma):
     return losses, w
 
 
-def build_poly(x, degree):
+def add_column_of_ones(x):
+
+    ones = np.ones(len(x))
+
+    return np.c_[ones, x]
+
+
+def build_poly_with_ones(x, degree):
     """polynomial basis functions for input data x, for j=0 up to j=degree."""
 
     pol = np.ones(len(x))
 
     for n in range(degree):
         pol = np.c_[pol, pow(x, n + 1)]
+
+    return pol
+
+
+def build_poly(x, degree):
+
+    pol = x
+
+    for n in range(1, degree):
+        pol = np.c_[pol, pow(x, n+1)]
 
     return pol
 
@@ -123,7 +140,7 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
 
     train_ind = np.reshape(train_ind, new_shape)
 
-    x = build_poly(x, degree)
+    x = build_poly_with_ones(x, degree)
 
     x_train = x[train_ind]
     x_test = x[test_ind]
@@ -174,30 +191,42 @@ def least_squares(y, tx):
 
     opt_w = np.linalg.solve(a, b)
 
-    return opt_w
+    loss = compute_mse(y, tx, opt_w)
+
+    print("Least Squares: loss={l}, w={weight}".format(
+        l=loss, weight=opt_w))
+
+    return loss, opt_w
 
 
 def sigmoid(t):
     """apply sigmoid function on t."""
 
-    return 1 / (1 + np.exp(-t))
+    return 1 / (1 + np.exp(-t, dtype=np.float128))
 
 
 def lr_compute_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
 
-    sig = sigmoid(tx.dot(w))
+    # sig = sigmoid(tx.dot(w))
+    # loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig))
+    #
+    # Equivalent
 
-    loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig))
+    pred = tx.dot(w)
+    loss = np.sum(np.log(1 + np.exp(pred)) - y.T.dot(pred))
 
     return loss
 
 
 def lr_compute_gradient(y, tx, w):
     """compute the gradient of loss."""
-    sig = sigmoid(tx.dot(w))
+
+    pred = tx.dot(w)
+    sig = sigmoid(pred)
     gradient = tx.T.dot(sig - y)
-    loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig))
+    # loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig))
+    loss = np.sum(np.log(1 + np.exp(pred))) - y.T.dot(pred)
 
     return gradient, loss
 
@@ -226,13 +255,14 @@ def hessian(tx, w):
     return H
 
 
-def logistic_regression(y, tx, w):
+def lr_loss_gradient_hessian(y, tx, w):
     """return the loss, gradient, and hessian."""
 
     return lr_compute_loss(y, tx, w), lr_compute_gradient(y, tx, w), hessian(tx, w)
 
 
 def logistic_regression2(y, tx, initial_w, max_iters, gamma):
+
     ws = [initial_w]
     losses = []
     w = initial_w
@@ -256,7 +286,7 @@ def newton_method(y, tx, w):
     return the loss and updated w.
     """
 
-    loss, gradient, H = logistic_regression(y, tx, w)
+    loss, gradient, H = lr_loss_gradient_hessian(y, tx, w)
 
     a = H
     b = H.dot(w) - gradient
