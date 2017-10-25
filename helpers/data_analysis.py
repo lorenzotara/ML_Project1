@@ -71,3 +71,45 @@ def features_normalization(x):
     return new_x
 
 
+def outliers_modified_z_score(xs):
+    """
+    finds the index of the outliers, and replaces them by the mean value of the column.
+    :type xs: feature matrix
+    """
+    for i in range(len(xs[0])):
+        threshold = 3.5
+
+        median_x = np.median(xs[:, i])
+        # modified_z_scores = []
+
+        for x in xs[:, i]:
+            median_absolute_deviation_x = np.median(np.abs(x - median_x))
+            if median_absolute_deviation_x == 0:
+                median_absolute_deviation_x = 1e-30
+            modified_z_scores = (0.6745 * (x - median_x) / median_absolute_deviation_x)
+
+            if modified_z_scores > threshold:
+                x[:, i] = mean(xs[:, i]) # * random number(either based on distribution or Q1/Q3) - avoid overemphasizing mean
+        outliers = np.array(np.where(np.abs(modified_z_scores) > threshold))
+
+        # median_x = np.median(xs[:, i])
+        # median_absolute_deviation_x = np.median([np.abs(x - median_x) for x in xs[:, i]])
+        # # NEED TO FIX: DIVISION BY ZERO:
+        # modified_z_scores = []
+        # for x in xs[:, i]:
+        #     if median_absolute_deviation_x == 0:
+        #         median_absolute_deviation_x = 1e-10
+        #     modified_z_scores.append(0.6745 * (x - median_x) / median_absolute_deviation_x)
+        # outliers = np.array(np.where(np.abs(modified_z_scores) > threshold))
+        #
+        # outliers = np.reshape(outliers, [len(outliers[0, :]), ])
+        # temp = np.delete(xs[:, i], outliers)
+        #
+        # for j in enumerate(outliers):
+        #     xs[j, i] = np.mean(temp)
+    return xs
+
+def distribution_histogram(x):
+    for i in x[:, i]:
+        plt.figure(i)
+        plt.plot()

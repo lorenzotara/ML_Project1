@@ -18,7 +18,6 @@ If we delete the rows that contain -999 we have a worse score than if we didn't 
 # y = delete_bad_rows(y)
 
 
-
 '''
 For the moment we replace wrong data with approximate mean of the column,
 calculated without taking account of wrong data
@@ -31,6 +30,11 @@ that were dropped because they were part of a row with a wrong element.
 x = replace_wrong_data(x)
 prova = "link to git"
 
+'''
+Removes outliers
+'''
+
+x = outliers_modified_z_score(x)
 
 '''
 Features normalization
