@@ -349,7 +349,9 @@ def least_squares(y, tx):
 def sigmoid(t):
     """apply sigmoid function on t."""
 
-    return 1 / (1 + np.exp(-t, dtype=np.float128))
+    # If you need to use the np.linalg.solve you can't use dtype =
+    # return 1 / (1 + np.exp(-t, dtype=np.float128))
+    return 1 / (1 + np.exp(-t))
 
 
 def lr_compute_loss(y, tx, w):
@@ -371,11 +373,11 @@ def lr_compute_gradient(y, tx, w):
 
     pred = tx.dot(w)
     sig = sigmoid(pred)
-    gradient = tx.T.dot(sig - y)
-    # loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig))
-    loss = np.sum(np.log(1 + np.exp(pred))) - y.T.dot(pred)
+    gradient = tx.T.dot(sig - y) / len(y)
+    loss = - np.sum(y * np.log(sig) + (1 - y) * np.log(1 - sig)) / len(y)
+    # loss = (np.sum(np.log(1 + np.exp(pred))) - y.T.dot(pred)) / len(y)
 
-    return gradient, loss
+    return loss, gradient
 
 
 # def lr_gradient_descent(y, tx, w, gamma):
@@ -404,8 +406,10 @@ def hessian(tx, w):
 
 def lr_loss_gradient_hessian(y, tx, w):
     """return the loss, gradient, and hessian."""
+    loss, gradient = lr_compute_gradient(y, tx, w)
+    # print(loss)
 
-    return lr_compute_loss(y, tx, w), lr_compute_gradient(y, tx, w), hessian(tx, w)
+    return lr_compute_loss(y, tx, w), gradient, hessian(tx, w)
 
 
 def logistic_regression2(y, tx, initial_w, max_iters, gamma):
@@ -415,7 +419,7 @@ def logistic_regression2(y, tx, initial_w, max_iters, gamma):
     w = initial_w
 
     for n_iter in range(max_iters):
-        gradient, loss = lr_compute_gradient(y, tx, w)
+        loss, gradient = lr_compute_gradient(y, tx, w)
 
         w -= gamma * gradient
         ws.append(w)
@@ -437,6 +441,7 @@ def newton_method(y, tx, w):
 
     a = H
     b = H.dot(w) - gradient
+
     w = np.linalg.solve(a, b)
 
     return loss, w

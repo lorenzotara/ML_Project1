@@ -35,6 +35,15 @@ def predict_labels(weights, data):
     return y_pred
 
 
+def predict_labels_for_lr(weights, data):
+    """Generates class predictions given weights, and a test data matrix"""
+    y_pred = np.dot(data, weights)
+    y_pred[np.where(y_pred <= 0.5)] = -1
+    y_pred[np.where(y_pred > 0.5)] = 1
+
+    return y_pred
+
+
 def plot_gamma_parameter(x_train, y_train, x_test, y_test, max_iters, initial_w, gamma_start=0, gamma_end=10, step_size=1):
 
     axis_x = []
