@@ -50,7 +50,7 @@ def replace_wrong_data(x):
     # Every element of tx is a column of x without the wrong data
     for i in range(len(x[0])):
 
-        tx.append(np.delete(x[:, i], np.argwhere(x[:, i] == -999)))
+        tx.append(np.delete(x[:, i], np.where(x[:, i] == -999)))
 
     # Calculating the mean of every column not taking account of the wrong data
     # and then putting it instead of the wrong datum
@@ -58,7 +58,7 @@ def replace_wrong_data(x):
 
         mean = np.mean(tx[i])
 
-        new_x[np.argwhere(new_x[:, i] == -999), i] = mean
+        new_x[np.where(new_x[:, i] == -999), i] = mean
 
     return new_x
 
@@ -171,7 +171,7 @@ def distribution_histogram(x):
 
         print(i)
 
-        tx.append(np.delete(x[:, i], np.argwhere(x[:, i] == -999)))
+        tx.append(np.delete(x[:, i], np.where(x[:, i] == -999)))
 
         plt.figure(i)
         plt.hist(tx[i], bins=150)  # arguments are passed to np.histogram
