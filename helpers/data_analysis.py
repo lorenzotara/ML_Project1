@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 
 
 def delete_bad_columns(x):
+    '''Deleting every column that have more than 60% of wrong values'''
 
     bad_columns = []
     not_that_bad_columns =[]
@@ -29,6 +30,7 @@ def delete_bad_columns(x):
 
 
 def delete_bad_rows(x, y):
+    '''Deleting every row with wrong values'''
 
     bad_rows = []
 
@@ -41,7 +43,7 @@ def delete_bad_rows(x, y):
 
 
 def replace_wrong_data(x):
-
+    '''Replacing every wrong value with the mean of the column calculated without those values'''
     new_x = x
 
     tx = []
@@ -61,24 +63,44 @@ def replace_wrong_data(x):
     return new_x
 
 
-def features_standardization(x):
+def combine_features(x, list_of_features):
+    '''Combining every feature in list_of_features'''
 
+    features_combined = []
+    new_x = x
+
+    for column1 in list_of_features:
+        for column2 in list_of_features:
+
+            '''If the feature has not been seen already, we combine it with all the others'''
+            if (column1 not in features_combined) & (column2 not in features_combined) & (column1 != column2):
+
+                new_x = np.c_[new_x, new_x[:, column1] * new_x[:, column2]]
+
+        features_combined.append(column1)
+
+    return new_x
+
+
+def features_standardization(x):
+    '''Standardizing the features'''
     new_x = x
 
     for i in range(len(new_x[0])):
 
-        # Dividing by the standard deviation
+        # Subtracting the mean and dividing by the standard deviation for every column
         new_x[:, i] = (new_x[:, i] - np.mean(new_x[:, i])) / np.std(new_x[:, i])
 
     return new_x
 
 
 def features_normalization(x):
+    '''Normalizing the features'''
 
     new_x = x
 
     for i in range(len(new_x[0])):
-        # Dividing by the difference between the maximum and the minimum
+        # Subtracting the mean and dividing by the difference between the maximum and the minimum
         new_x[:, i] = (new_x[:, i] - np.mean(new_x[:, i])) / (np.max(new_x[:, i]) - np.min(new_x[:, i]))
 
     return new_x

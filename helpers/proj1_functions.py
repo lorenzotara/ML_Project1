@@ -1,4 +1,7 @@
 import numpy as np
+from matplotlib import pyplot as plt
+from helpers.data_analysis import *
+from helpers.proj1_helpers import *
 
 
 def compute_mse(y, tx, w):
@@ -128,7 +131,19 @@ def split_data(x, y, ratio, seed=1):
     return x_train, y_train, X_test, Y_test
 
 
-def cross_validation(y, x, k_indices, k, lambda_, degree):
+def cross_validation_visualization(lambds, mse_tr, mse_te):
+    """visualization the curves of mse_tr and mse_te."""
+    plt.semilogx(lambds, mse_tr, marker=".", color='b', label='train error')
+    plt.semilogx(lambds, mse_te, marker=".", color='r', label='test error')
+    plt.xlabel("lambda")
+    plt.ylabel("rmse")
+    plt.title("cross validation")
+    plt.legend(loc=2)
+    plt.grid(True)
+    plt.savefig("cross_validation")
+
+
+def lr_cross_validation(y, x, k_indices, k, degree):
     """return the loss of ridge regression."""
 
     test_ind = k_indices[k]
@@ -136,11 +151,51 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     train_ind = np.delete(train_ind, k, axis=0)
 
     n_fold = len(k_indices)
-    new_shape = int(len(x) * (n_fold - 1) / (n_fold) - 1)
+    new_shape = int(len(x) * (n_fold - 1) / (n_fold) - 1) + 1
 
     train_ind = np.reshape(train_ind, new_shape)
 
     x = build_poly_with_ones(x, degree)
+    x[:, 1:len(x)] = features_standardization(x[:, 1:len(x)])
+
+    x_train = x[train_ind]
+    x_test = x[test_ind]
+
+    y_train = y[train_ind]
+    y_test = y[test_ind]
+
+    loss, ws = least_squares(y_train, x_train)
+
+    loss_tr = compute_mse(y_train, x_train, ws)
+    loss_te = compute_mse(y_test, x_test, ws)
+    print("\n\n\n")
+    print("loss_tr: ", loss_tr)
+    print("loss_te: ", loss_te)
+
+    y_pred = predict_labels(ws, x_test)
+    final_result = y_test == y_pred
+
+    score = np.count_nonzero(final_result) / len(final_result)
+
+    print("\n", score * 100, "%")
+
+    return loss_tr, loss_te
+
+
+def lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_):
+    """return the loss of ridge regression."""
+
+    test_ind = k_indices[k]
+    train_ind = k_indices
+    train_ind = np.delete(train_ind, k, axis=0)
+
+    n_fold = len(k_indices)
+    new_shape = int(len(x) * (n_fold - 1) / (n_fold) - 1) + 1
+
+    train_ind = np.reshape(train_ind, new_shape)
+
+    # x = build_poly_with_ones(x, degree)
+    # x[:, 1:len(x)] = features_standardization(x[:, 1:len(x)])
 
     x_train = x[train_ind]
     x_test = x[test_ind]
@@ -152,8 +207,101 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
 
     loss_tr = compute_mse(y_train, x_train, ws)
     loss_te = compute_mse(y_test, x_test, ws)
+    print("\n\n\n")
+    print("loss_tr: ", loss_tr)
+    print("loss_te: ", loss_te)
+
+    y_pred = predict_labels(ws, x_test)
+    final_result = y_test == y_pred
+
+    score = np.count_nonzero(final_result) / len(final_result)
+
+    print("\n", score * 100, "%")
 
     return loss_tr, loss_te
+
+
+def cross_validation(y, x, k_indices, k, lambda_, degree):
+    """return the loss of ridge regression."""
+
+    test_ind = k_indices[k]
+    train_ind = k_indices
+    train_ind = np.delete(train_ind, k, axis=0)
+
+    n_fold = len(k_indices)
+    new_shape = int(len(x) * (n_fold - 1) / (n_fold) - 1) + 1
+
+    train_ind = np.reshape(train_ind, new_shape)
+
+    x = build_poly_with_ones(x, degree)
+    x[:, 1:len(x)] = features_standardization(x[:, 1:len(x)])
+
+    x_train = x[train_ind]
+    x_test = x[test_ind]
+
+    y_train = y[train_ind]
+    y_test = y[test_ind]
+
+    loss, ws = least_squares(y_train, x_train, lambda_)
+
+    loss_tr = compute_mse(y_train, x_train, ws)
+    loss_te = compute_mse(y_test, x_test, ws)
+
+    return loss_tr, loss_te
+
+
+def lr_ridge_cross_validation_demo(y, x, k_fold_):
+    seed = 1
+    k_fold = k_fold_
+    lambdas = np.logspace(-4, 0, 30)
+    # split data in k fold
+    k_indices = build_k_indices(y, k_fold, seed)
+    # define lists to store the loss of training data and test data
+    rmse_tr = []
+    rmse_te = []
+
+    for ind, lambda_ in enumerate(lambdas):
+
+        cross_tr = []
+        cross_te = []
+
+        for k in range(k_fold):
+            loss_tr, loss_te = lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_)
+            cross_tr.append(loss_tr)
+            cross_te.append(loss_te)
+
+        rmse_tr.append(np.sqrt(2 * np.mean(cross_tr)))
+        rmse_te.append(np.sqrt(2 * np.mean(cross_te)))
+
+    # cross_validation_visualization(lambdas, rmse_tr, rmse_te)
+    return rmse_tr, rmse_te, lambdas
+
+
+def cross_validation_demo(y, x, degree_, k_fold_):
+    seed = 1
+    degree = degree_
+    k_fold = k_fold_
+    lambdas = np.logspace(-4, 0, 30)
+    # split data in k fold
+    k_indices = build_k_indices(y, k_fold, seed)
+    # define lists to store the loss of training data and test data
+    rmse_tr = []
+    rmse_te = []
+
+    for ind, lambda_ in enumerate(lambdas):
+
+        cross_tr = []
+        cross_te = []
+
+        for k in range(k_fold):
+            loss_tr, loss_te = cross_validation(y, x, k_indices, k, lambda_, degree)
+            cross_tr.append(loss_tr)
+            cross_te.append(loss_te)
+
+        rmse_tr.append(np.sqrt(2 * np.mean(cross_tr)))
+        rmse_te.append(np.sqrt(2 * np.mean(cross_te)))
+
+    cross_validation_visualization(lambdas, rmse_tr, rmse_te)
 
 
 def build_k_indices(y, k_fold, seed):
@@ -193,8 +341,7 @@ def least_squares(y, tx):
 
     loss = compute_mse(y, tx, opt_w)
 
-    print("Least Squares: loss={l}, w={weight}".format(
-        l=loss, weight=opt_w))
+    print("Least Squares: loss={l}, w={weight}".format(l=loss, weight=opt_w))
 
     return loss, opt_w
 

@@ -5,6 +5,8 @@ from helpers.proj1_helpers import *
 train_path = "Data/train.csv"
 
 y, x, ids = load_csv_data(train_path)
+y[np.argwhere(y==-1)] = 0
+print(y)
 
 ######## DATA ANALYSIS ###########
 
@@ -21,7 +23,7 @@ x_train, y_train, x_test, y_test = split_data(x, y, 0.7)
 initial_w = [0] * len(x[0])
 max_iters = 1000
 
-gamma = 0.0000001
+gamma = 0.0002
 
 losses, ws = logistic_regression2(y_train, x_train, initial_w, max_iters, gamma)
 

@@ -49,17 +49,19 @@ x = replace_wrong_data(x)
 # x_sin = np.sin(x)
 # x_cos = np.cos(x)
 # x_exp = np.exp(x)
+
+x = build_poly(x, 12)
 # x = np.c_[x, x_cos]
 # x = np.c_[x, x_sin]
-x = build_poly(x, 5)
-x = add_column_of_ones(x)
+# x = combine_features(x, np.arange(15))
+# x = add_column_of_ones(x)
 
 '''
 Features normalization/standardization - except first column of ones
 '''
 
 # x[:, 1:len(x)] = features_normalization(x[:, 1:len(x)])
-x[:, 1:len(x)] = features_standardization(x[:, 1:len(x)])
+# x[:, 1:len(x)] = features_standardization(x[:, 1:len(x)])
 
 
 
@@ -70,6 +72,8 @@ x[:, 1:len(x)] = features_standardization(x[:, 1:len(x)])
 ########## SPLIT DATA ##################
 
 x_train, y_train, x_test, y_test = split_data(x, y, 0.7)
+
+
 
 '''
 Uncomment when you want to submit
@@ -90,6 +94,35 @@ LEAST SQUARES
 losses, ws = least_squares(y_train, x_train)
 
 y_pred = predict_labels(ws, x_test)
+
+
+'''CROSS VALIDATION'''
+# seed = 1
+# degree = 4
+# k_fold = 4
+# lambdas = np.logspace(-4, 0, 30)
+# # split data in k fold
+# k_indices = build_k_indices(y, k_fold, seed)
+# # define lists to store the loss of training data and test data
+# cross_tr = []
+# cross_te = []
+#
+# for k in range(k_fold):
+#     loss_tr, loss_te = lr_cross_validation(y, x, k_indices, k, degree)
+#     cross_tr.append(loss_tr)
+#     cross_te.append(loss_te)
+#
+# plt.figure()
+# ax = plt.subplot(111)
+# training_plot = ax.plot(cross_tr)
+# testing_plot = ax.plot(cross_te)
+# ax.set_xlabel("k")
+# ax.set_ylabel("errors")
+# ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
+#
+# plt.show()
+
+
 
 
 '''
