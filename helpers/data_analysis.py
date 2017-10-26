@@ -93,6 +93,16 @@ def features_standardization(x):
 
     return new_x
 
+def rescale_standardization(x):
+    '''Standardizing the features'''
+    new_x = x
+
+    for i in range(len(new_x[0])):
+
+        # Subtracting the mean and dividing by the standard deviation for every column
+        new_x[:, i] = (new_x[:, i] + np.mean(new_x[:, i])) * np.std(new_x[:, i])
+
+    return new_x
 
 def features_normalization(x):
     '''Normalizing the features'''
