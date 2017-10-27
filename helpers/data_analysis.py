@@ -81,6 +81,17 @@ def combine_features(x, list_of_features):
 
     return new_x
 
+def calculate_mean_std_vector(x):
+    mu = []
+    sigma = []
+
+    for i in range(len(x[0])):
+
+        # Creates the mean and standard deviation vectors
+        mu.append(np.mean(x[:, i]))
+        sigma.append(np.std(x[:, i]))
+
+    return mu, sigma
 
 def features_standardization(x):
     '''Standardizing the features'''
@@ -93,14 +104,14 @@ def features_standardization(x):
 
     return new_x
 
-def rescale_standardization(x):
-    '''Standardizing the features'''
+def rescale_standardization(x, mu, sigma):
+    '''Scales input back to original form, based on original mean and standard deviation.'''
     new_x = x
 
     for i in range(len(new_x[0])):
 
-        # Subtracting the mean and dividing by the standard deviation for every column
-        new_x[:, i] = (new_x[:, i] + np.mean(new_x[:, i])) * np.std(new_x[:, i])
+        # Adding the mean and multiply by the standard deviation for every column
+        new_x[:, i] = (new_x[:, i] + mu) * sigma
 
     return new_x
 
@@ -177,3 +188,75 @@ def distribution_histogram(x):
         plt.hist(tx[i], bins=150)  # arguments are passed to np.histogram
         plt.title("{y}".format(y=title))
         plt.show()
+
+
+def PCA(x, chosen_dimensions):
+    ''' Computes the principal components of a given data set. Input x has to be without NaNs and standardized,
+    chosen_dimensions is the dimensions one wishes to end up with. Returns the projected X with the chosen dimensions,
+    and the eigenvalue ratios for plotting.
+    '''
+    # W: vector with all the eigenvalues, V: array of eigenvectors
+    W, V = np.linalg.eig(np.cov(x_standardized, rowvar=False))  # rowvar=False: column - variable, rows - observations.
+
+    #Analysing the eigenvalues
+    W_sort = np.sort(W)
+    W_sort = list(W_sort[::-1])  # flip w in descending order
+    eig_ratios = W_sort / sum(W)  # ratios of eigenvalues
+
+
+    #Sorts the eigenvectors corresponding to sorted eigenvalues
+    W = list(W)
+    PC_indices = []
+    V_sort = np.zeros([len(V)])
+    for i in range(len(W_sort)):
+        # PC_indices.append(W.index(w))
+        PC_indices.append(W.index(W_sort[i]))
+        V_sort = np.column_stack([V_sort, V[:, PC_indices[i]]])
+    V_sort = np.delete(V_sort, [0], axis=1)
+
+    projected_data = np.dot(x_standardized, V_sort[:, :chosen_dimensions])
+
+    return projected_data, eig_ratios
+
+
+def visualization_PCA(eig_ratios):
+    '''Plots the eigenvalue ratios of the principal components and the cumulated ratios in a scree plot'''
+    # X-axis labels (xticks)
+    objects = ('PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10', 'PC11', 'PC12', 'PC13',
+               'PC14', 'PC15', 'PC16', 'PC17', 'PC18', 'PC19', 'PC20', 'PC21', 'PC22', 'PC23', 'PC24', 'PC25',
+               'PC26', 'PC27', 'PC28', 'PC29', 'PC30')
+    N = len(objects)
+
+    #Length of x-axis
+    x_pos = np.arange(N)
+
+    #Computes accumulated eigenvector ratios
+    eig_accumulated = np.cumsum(eig_ratios, dtype=float)
+
+    #Scree plot
+    plt.figure(1)
+    plt.scatter(x_pos, eig_ratios)
+    plt.scatter(x_pos, eig_accumulated)
+    plt.plot(x_pos, eig_ratios)
+    plt.plot(x_pos, eig_accumulated)
+    plt.axhline(y=0.85, color='r')
+    plt.axvline(x=13, color='r')
+    plt.grid()
+    plt.ylabel('Compared value')
+    plt.title('Eigenvalues, PCA')
+
+    # Following fits xticks, so all xticks are readable.
+    plt.xticks(x_pos, objects)
+
+    plt.gca().margins(x=0)
+    plt.gcf().canvas.draw()
+    tl = plt.gca().get_xticklabels()
+    maxsize = max([t.get_window_extent().width for t in tl])
+    m = 0.2  # inch margin
+    s = maxsize / plt.gcf().dpi * (N + 1) + 2 * m
+    margin = m / plt.gcf().get_size_inches()[0]
+
+    plt.gcf().subplots_adjust(left=margin, right=1. - margin)
+    plt.gcf().set_size_inches(s, plt.gcf().get_size_inches()[1])
+
+    plt.show()
