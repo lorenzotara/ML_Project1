@@ -207,7 +207,7 @@ def lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_):
 
     loss_tr = compute_mse(y_train, x_train, ws)
     loss_te = compute_mse(y_test, x_test, ws)
-    print("\n\n\n")
+
     print("loss_tr: ", loss_tr)
     print("loss_te: ", loss_te)
 
@@ -275,6 +275,27 @@ def lr_ridge_cross_validation_demo(y, x, k_fold_):
 
     # cross_validation_visualization(lambdas, rmse_tr, rmse_te)
     return rmse_tr, rmse_te, lambdas
+
+
+def lr_ridge_cross_val_demo_lambda_fixed(y, x, k_fold_, lambda_):
+    seed = 1
+    k_fold = k_fold_
+    # split data in k fold
+    k_indices = build_k_indices(y, k_fold, seed)
+    # define lists to store the loss of training data and test data
+    cross_tr = []
+    cross_te = []
+
+    print("\n\n\n")
+    print("lambda: ", lambda_)
+
+    for k in range(k_fold):
+        loss_tr, loss_te = lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_)
+        cross_tr.append(np.sqrt(2*loss_tr))
+        cross_te.append(np.sqrt(2*loss_te))
+
+    # cross_validation_visualization(lambdas, rmse_tr, rmse_te)
+    return cross_tr, cross_te
 
 
 def cross_validation_demo(y, x, degree_, k_fold_):

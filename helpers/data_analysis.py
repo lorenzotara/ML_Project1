@@ -21,10 +21,10 @@ def delete_bad_columns(x):
 
     tx = np.delete(x, bad_columns, 1)
 
-    print("Bad Columns")
-    print(bad_columns)
-    print("\n\nNot That Bad Columns")
-    print(not_that_bad_columns)
+    # print("Bad Columns")
+    # print(bad_columns)
+    # print("\n\nNot That Bad Columns")
+    # print(not_that_bad_columns)
 
     return tx
 
