@@ -13,7 +13,7 @@ def delete_bad_columns(x):
 
         nan_ratio = len(x_nan) / len(x[:, i])
 
-        if nan_ratio > 0.6:
+        if nan_ratio > 0.99:
             bad_columns.append(i)
 
         elif nan_ratio > 0:
@@ -40,6 +40,19 @@ def delete_bad_rows(x, y):
             bad_rows.append(i)
 
     return np.delete(x, bad_rows, 0), np.delete(y, bad_rows)
+
+
+def delete_equal_columns(x):
+
+    temp = x
+    columns_to_del = []
+    for index in range(x.shape[1]):
+        if np.std(x[:, index]) == 0:
+            # temp = np.delete(temp, index, axis=1)
+            columns_to_del.append(index)
+
+    return np.delete(temp, columns_to_del, axis=1)
+
 
 
 def replace_wrong_data(x):
@@ -165,6 +178,7 @@ def outliers_modified_z_score(xs):
         #     xs[j, i] = np.mean(temp)
     return xs
 
+
 def distribution_histogram(x):
     titles = np.array(['DER_mass_MMC', 'DER_mass_transverse_met_lep',
                        'DER_mass_vis', 'DER_pt_h', 'DER_deltaeta_jet_jet', 'DER_mass_jet_jet',
@@ -196,7 +210,7 @@ def PCA(x, chosen_dimensions):
     and the eigenvalue ratios for plotting.
     '''
     # W: vector with all the eigenvalues, V: array of eigenvectors
-    W, V = np.linalg.eig(np.cov(x_standardized, rowvar=False))  # rowvar=False: column - variable, rows - observations.
+    W, V = np.linalg.eig(np.cov(x, rowvar=False))  # rowvar=False: column - variable, rows - observations.
 
     #Analysing the eigenvalues
     W_sort = np.sort(W)
@@ -214,7 +228,7 @@ def PCA(x, chosen_dimensions):
         V_sort = np.column_stack([V_sort, V[:, PC_indices[i]]])
     V_sort = np.delete(V_sort, [0], axis=1)
 
-    projected_data = np.dot(x_standardized, V_sort[:, :chosen_dimensions])
+    projected_data = np.dot(x, V_sort[:, :chosen_dimensions])
 
     return projected_data, eig_ratios
 
@@ -260,3 +274,12 @@ def visualization_PCA(eig_ratios):
     plt.gcf().set_size_inches(s, plt.gcf().get_size_inches()[1])
 
     plt.show()
+
+
+def fourier(x):
+
+    temp = x
+    for i in range(x.shape[1]):
+        temp[:, i] = np.fft.fft(x[:, i])
+
+    return temp
