@@ -190,7 +190,8 @@ def lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_):
     train_ind = np.delete(train_ind, k, axis=0)
 
     n_fold = len(k_indices)
-    new_shape = int(len(x) * (n_fold - 1) / (n_fold) - 1) + 1
+    # new_shape = int(len(x) * (n_fold - 1) / (n_fold) - 1) - 1 #+ 1
+    new_shape = train_ind.shape[0] * train_ind.shape[1]
 
     train_ind = np.reshape(train_ind, new_shape)
 
@@ -208,15 +209,15 @@ def lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_):
     loss_tr = compute_mse(y_train, x_train, ws)
     loss_te = compute_mse(y_test, x_test, ws)
 
-    print("loss_tr: ", loss_tr)
-    print("loss_te: ", loss_te)
+    # print("loss_tr: ", loss_tr)
+    # print("loss_te: ", loss_te)
 
     y_pred = predict_labels(ws, x_test)
     final_result = y_test == y_pred
 
     score = np.count_nonzero(final_result) / len(final_result)
 
-    print("\n", score * 100, "%")
+    # print("\n", score * 100, "%")
 
     return loss_tr, loss_te
 
@@ -286,8 +287,8 @@ def lr_ridge_cross_val_demo_lambda_fixed(y, x, k_fold_, lambda_):
     cross_tr = []
     cross_te = []
 
-    print("\n\n\n")
-    print("lambda: ", lambda_)
+    # print("\n\n\n")
+    # print("lambda: ", lambda_)
 
     for k in range(k_fold):
         loss_tr, loss_te = lr_ridge_reg_cross_validation(y, x, k_indices, k, lambda_)

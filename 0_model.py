@@ -23,13 +23,15 @@ y_list = []
 
 x_0 = x[np.where(x[:, jet_num] == 0)]
 
+distribution_histogram(x_0)
+
 '''We drop the last column because it's full of zeros'''
-x_0 = np.delete(x_0, x_0.shape[1] - 1, axis=1)
+# x_0 = np.delete(x_0, x_0.shape[1] - 1, axis=1)
 y_0 = y[np.where(x[:, jet_num] == 0)]
 ids_0 = ids[np.where(x[:, jet_num] == 0)]
 
 
-x_0 = np.delete(x_0, jet_num, axis=1)
+# x_0 = np.delete(x_0, jet_num, axis=1)
 
 x_0 = delete_bad_columns(x_0)
 x_0 = replace_wrong_data_mean(x_0)
