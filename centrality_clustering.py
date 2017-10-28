@@ -23,38 +23,53 @@ subsets_ids_test = []
 for i in range(2):
     '''
     Creating first two clusters based on PRI_jet_num 0 and 1, and dividing those two into four based on nan or non-nan
-    values in the DER_mass_MMD column.
+    values in the DER_mass_MMD column
     '''
 
-    subsets_x.append(x[np.where(x[:, jet_num] == i & x[:, 0] == -999)])
-    subsets_x.append(x[np.where(x[:, jet_num] == i & x[:, 0] != -999)])
-    subsets_y.append(y[np.where(x[:, jet_num] == i & x[:, 0] == -999)])
-    subsets_y.append(y[np.where(x[:, jet_num] == i & x[:, 0] != -999)])
-    subsets_ids.append(ids[np.where(x[:, jet_num] == i & x[:, 0] == -999)])
-    subsets_ids.append(ids[np.where(x[:, jet_num] == i & x[:, 0] != -999)])
+    # print(np.logical_and(x[:, jet_num] == i, x[:, 0] == -999))
 
-    subsets_x_test.append(x_test[np.where(x_test[:, jet_num] == i & x[:, 0] == -999)])
-    subsets_x_test.append(x_test[np.where(x_test[:, jet_num] == i & x[:, 0] != -999)])
-    subsets_y_test.append(y_test[np.where(x_test[:, jet_num] == i & x[:, 0] == -999)])
-    subsets_y_test.append(y_test[np.where(x_test[:, jet_num] == i & x[:, 0] != -999)])
-    subsets_ids_test.append(ids_test[np.where(x_test[:, jet_num] == i & x[:, 0] == -999)])
-    subsets_ids_test.append(ids_test[np.where(x_test[:, jet_num] == i & x[:, 0] != -999)])
+    nan_indices_train = np.where(np.logical_and(x[:, jet_num] == i, x[:, 0] == -999))
+    not_nan_indices_train = np.where(np.logical_and(x[:, jet_num] == i, x[:, 0] != -999))
+
+    subsets_x.append(x[nan_indices_train])
+    subsets_x.append(x[not_nan_indices_train])
+    subsets_y.append(y[nan_indices_train])
+    subsets_y.append(y[not_nan_indices_train])
+    subsets_ids.append(ids[nan_indices_train])
+    subsets_ids.append(ids[not_nan_indices_train])
+
+    nan_indices_test = np.where(np.logical_and(x_test[:, jet_num] == i, x_test[:, 0] == -999))
+    not_nan_indices_test = np.where(np.logical_and(x_test[:, jet_num] == i, x_test[:, 0] != -999))
+
+    subsets_x_test.append(x_test[nan_indices_test])
+    subsets_x_test.append(x_test[not_nan_indices_test])
+    subsets_y_test.append(y_test[nan_indices_test])
+    subsets_y_test.append(y_test[not_nan_indices_test])
+    subsets_ids_test.append(ids_test[nan_indices_test])
+    subsets_ids_test.append(ids_test[not_nan_indices_test])
+
 
 '''Split the jet numbers 2 and 3 based on the DER_lep_eta_centrality greater or smaller than 0.5'''
 
-subsets_x.append(x[np.where(x[:, jet_num] > 1 & x[:, 12] > 0.5)])
-subsets_x.append(x[np.where(x[:, jet_num] > 1 & x[:, 12] < 0.5)])
-subsets_y.append(y[np.where(x[:, jet_num] > 1 & x[:, 12] > 0.5)])
-subsets_y.append(y[np.where(x[:, jet_num] > 1 & x[:, 12] < 0.5)])
-subsets_ids.append(ids[np.where(x[:, jet_num] > 1 & x[:, 12] > 0.5)])
-subsets_ids.append(ids[np.where(x[:, jet_num] > 1 & x[:, 12] < 0.5)])
+one_centrality_train = np.where(np.logical_and(x[:, jet_num] > 1, x[:, 12] >= 0.5))
+zero_centrality_train = np.where(np.logical_and(x[:, jet_num] > 1, x[:, 12] < 0.5))
 
-subsets_x_test.append(x_test[np.where(x_test[:, jet_num] > 1 & x_test[:, 12] > 0.5)])
-subsets_x_test.append(x_test[np.where(x_test[:, jet_num] > 1 & x_test[:, 12] < 0.5)])
-subsets_y_test.append(y_test[np.where(x_test[:, jet_num] > 1 & x_test[:, 12] > 0.5)])
-subsets_y_test.append(y_test[np.where(x_test[:, jet_num] > 1 & x_test[:, 12] < 0.5)])
-subsets_ids_test.append(ids_test[np.where(x_test[:, jet_num] > 1 & x_test[:, 12] > 0.5)])
-subsets_ids_test.append(ids_test[np.where(x_test[:, jet_num] > 1 & x_test[:, 12] < 0.5)])
+subsets_x.append(x[one_centrality_train])
+subsets_x.append(x[zero_centrality_train])
+subsets_y.append(y[one_centrality_train])
+subsets_y.append(y[zero_centrality_train])
+subsets_ids.append(ids[one_centrality_train])
+subsets_ids.append(ids[zero_centrality_train])
+
+one_centrality_test = np.where(np.logical_and(x_test[:, jet_num] > 1, x_test[:, 12] >= 0.5))
+zero_centrality_test = np.where(np.logical_and(x_test[:, jet_num] > 1, x_test[:, 12] < 0.5))
+
+subsets_x_test.append(x_test[one_centrality_test])
+subsets_x_test.append(x_test[zero_centrality_test])
+subsets_y_test.append(y_test[one_centrality_test])
+subsets_y_test.append(y_test[zero_centrality_test])
+subsets_ids_test.append(ids_test[one_centrality_test])
+subsets_ids_test.append(ids_test[zero_centrality_test])
 
 
 predictions = []
@@ -70,7 +85,7 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
 
     x_set = delete_bad_columns(x_set)
     x_set = delete_equal_columns(x_set)
-    x_set = replace_wrong_data(x_set)
+    x_set = linear_interpolation(x_set)
     # x_combined = combine_features(x_set, np.arange(13))
     # x_set = features_standardization(x_set)
     pca, eig_ratios = PCA(features_standardization(x_set), 14)
@@ -80,7 +95,7 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     x_set = np.c_[x_set, x_sin]
     x_set = np.c_[x_set, x_cos]
 
-    x_set = build_poly(x_set, 4)
+    x_set = build_poly(x_set, 3)
 
     x_set = add_column_of_ones(x_set)
 
@@ -92,12 +107,11 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     '''
     Working on the test data
     '''
-
     x_set_test = np.delete(x_set_test, jet_num, axis=1)
 
     x_set_test = delete_bad_columns(x_set_test)
     x_set_test = delete_equal_columns(x_set_test)
-    x_set_test = replace_wrong_data(x_set_test)
+    x_set_test = linear_interpolation(x_set_test)
 
     pca_test, eig_ratios_test = PCA(features_standardization(x_set_test), 14)
 
@@ -106,7 +120,7 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     x_set_test = np.c_[x_set_test, x_sin_test]
     x_set_test = np.c_[x_set_test, x_cos_test]
 
-    x_set_test = build_poly(x_set_test, 4)
+    x_set_test = build_poly(x_set_test, 3)
 
     x_set_test = add_column_of_ones(x_set_test)
 
@@ -133,67 +147,36 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     '''
     Plotting the errors from cross validation
     '''
-    plt.figure()
-    ax = plt.subplot(111)
-    training_plot = ax.plot(lambdas, rmse_tr)
-    testing_plot = ax.plot(lambdas, rmse_te)
-    ax.set_xlabel("lambdas")
-    ax.set_ylabel("errors")
-    ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
-    plt.show()
-    plt.close()
+    # plt.figure()
+    # ax = plt.subplot(111)
+    # training_plot = ax.plot(lambdas, rmse_tr)
+    # testing_plot = ax.plot(lambdas, rmse_te)
+    # ax.set_xlabel("lambdas")
+    # ax.set_ylabel("errors")
+    # ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
+    # plt.show()
+    # plt.close()
 
+
+    '''
+    Submission
+    '''
     index = np.argmin(rmse_te)
     lambda_ = lambdas[index]
 
     losses, ws = ridge_regression(y_set, x_set, lambda_)
 
-    # predictions.append(predict_labels(ws, x_set_test))
-    # final_ids.append(ids_set_test)
+    predictions.append(predict_labels(ws, x_set_test))
+    final_ids.append(ids_set_test)
     print('best lambda:', lambda_)
-    # print('losses:', losses)
+    print('losses:', losses)
 
 
+y_pred = np.concatenate(predictions)
+indices = np.concatenate(final_ids)
 
+print(y_pred.shape)
+print(indices.shape)
 
-# y_pred = np.concatenate(predictions)
-# indices = np.concatenate(final_ids)
-#
-# print(y_pred.shape)
-# print(indices.shape)
-#
-# create_csv_submission(indices, y_pred, "nan_clustering")
+create_csv_submission(indices, y_pred, "centrality_clustering_2")
 
-
-
-
-
-
-
-# '''
-# We divide the dataset in two different clusters:
-# one that contains NaNs and the other that not contains NaNs
-# based on the feature DER_mass_MMC
-# '''
-# x_nan = x[np.where(x[:, 0] == -999)]
-# x_not_nan = x[np.where(x[:, 0] != -999)]
-# y_nan = x[np.where(x[:, 0] == -999)]
-# y_not_nan = x[np.where(x[:, 0] != -999)]
-# ids_nan = x[np.where(x[:, 0] == -999)]
-# ids_not_nan = x[np.where(x[:, 0] != -999)]
-#
-# subsets_x.append(x_nan)
-# subsets_x.append(x_not_nan)
-# subsets_y.append(y_nan)
-# subsets_y.append(y_not_nan)
-# subsets_ids.append(ids_nan)
-# subsets_ids.append(ids_not_nan)
-#
-# jet_num = 22
-#
-# for set_index in range(len(subsets_x)):
-#
-#     for i in range(4):
-#         '''
-#         We divide every subset based on the PRI_jet_num feature value
-#         '''

@@ -284,12 +284,16 @@ def nan_helper(y):
         - index, a function, with signature indices= index(logical_indices),
           to convert logical indices of NaNs to 'equivalent' indices
     """
-    return np.isnan(y), lambda z: z.nonzero()[0]
+    # print(y==-999)
+    return y==-999, lambda z: z.nonzero()[0]
 
 
 def linear_interpolation(x):
     '''linear interpolation of NaNs'''
 
+    new_x = x
     nans, indices = nan_helper(x[:, 0])
 
-    x[: 0][nans]= np.interp(indices(nans), indices(~nans), x[:, 0][~nans])
+    new_x[:, 0][nans] = np.interp(indices(nans), indices(~nans), x[:, 0][~nans])
+
+    return new_x

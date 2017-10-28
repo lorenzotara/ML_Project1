@@ -70,11 +70,13 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     Working on the train data
     '''
 
+    # centrality_set = [x_set[v, 12] + 0.5 for v in range(len(x_set[:, 12]))]
+
     x_set = np.delete(x_set, jet_num, axis=1)
 
     x_set = delete_bad_columns(x_set)
     x_set = delete_equal_columns(x_set)
-    x_set = replace_wrong_data(x_set)
+    x_set = linear_interpolation(x_set)
     # x_combined = combine_features(x_set, np.arange(13))
     # x_set = features_standardization(x_set)
     pca, eig_ratios = PCA(features_standardization(x_set), 14)
@@ -91,17 +93,20 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     x_set[:, 1:len(x_set)] = features_standardization(x_set[:, 1:len(x_set)])
 
     x_set = np.c_[x_set, pca]
+    # x_set = np.c_[x_set, centrality_set]
     # x_set = np.c_[x_set, x_combined]
 
     '''
     Working on the test data
     '''
 
+    # centrality_test = [x_set_test[v, 12] + 0.5 for v in range(len(x_set_test[:, 12]))]
+
     x_set_test = np.delete(x_set_test, jet_num, axis=1)
 
     x_set_test = delete_bad_columns(x_set_test)
     x_set_test = delete_equal_columns(x_set_test)
-    x_set_test = replace_wrong_data(x_set_test)
+    x_set_test = linear_interpolation(x_set_test)
 
     pca_test, eig_ratios_test = PCA(features_standardization(x_set_test), 14)
 
@@ -117,6 +122,7 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     x_set_test[:, 1:len(x_set_test)] = features_standardization(x_set_test[:, 1:len(x_set_test)])
 
     x_set_test = np.c_[x_set_test, pca_test]
+    # x_set_test = np.c_[x_set_test, centrality_test]
 
 
     '''
@@ -161,7 +167,7 @@ indices = np.concatenate(final_ids)
 print(y_pred.shape)
 print(indices.shape)
 
-create_csv_submission(indices, y_pred, "nan_clustering")
+create_csv_submission(indices, y_pred, "nan_clustering_3")
 
 
 
