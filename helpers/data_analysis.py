@@ -42,9 +42,32 @@ def delete_bad_rows(x, y):
     return np.delete(x, bad_rows, 0), np.delete(y, bad_rows)
 
 
-def replace_wrong_data(x):
+def replace_wrong_data_mean(x):
     '''Replacing every wrong value with the mean of the column calculated without those values'''
     new_x = x
+
+    tx = []
+    # Every element of tx is a column of x without the wrong data
+    for i in range(len(x[0])):
+
+        tx.append(np.delete(x[:, i], np.where(x[:, i] == -999)))
+
+    # Calculating the mean of every column not taking account of the wrong data
+    # and then putting it instead of the wrong datum
+    for i in range(len(new_x[0])):
+
+        mean = np.mean(tx[i])
+
+        new_x[np.where(new_x[:, i] == -999), i] = mean
+
+    return new_x
+
+def replace_wrong_data_IQR(x):
+    '''Replacing every wrong value with a random number in the Inter Quartile Range of the column calculated without
+    those values'''
+    new_x = x
+
+    p25, p75 = np.percentile(x, [25 ,75])
 
     tx = []
     # Every element of tx is a column of x without the wrong data

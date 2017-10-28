@@ -11,7 +11,7 @@ y[np.argwhere(y == -1)] = 0
 ######## DATA ANALYSIS ###########
 
 
-x = replace_wrong_data(x)
+x = replace_wrong_data_mean(x)
 x = features_standardization(x)
 # x = features_normalization(x)
 

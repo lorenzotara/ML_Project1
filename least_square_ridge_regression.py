@@ -42,7 +42,7 @@ calculated without taking account of wrong data
 
 '''
 
-x = replace_wrong_data(x)
+x = replace_wrong_data_mean(x)
 
 # x = build_poly_with_ones(x, 6)
 
