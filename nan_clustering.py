@@ -1,10 +1,13 @@
+import time
+
 from helpers.data_analysis import *
 from helpers.proj1_functions import *
 from helpers.proj1_helpers import *
 from matplotlib import pyplot as plt
+from helpers.logistic_helpers import *
 
-train_path = "Data/train.csv"
-test_path = "Data/test.csv"
+train_path = "data/train.csv"
+test_path = "data/test.csv"
 
 y, x, ids = load_csv_data(train_path)
 
@@ -64,11 +67,15 @@ for i in range(4):
 predictions = []
 final_ids = []
 
+start = time.time()
+subset_index = 0
 for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x, subsets_y, subsets_ids, subsets_x_test, subsets_y_test, subsets_ids_test):
-
+    subset_index += 1
     '''
     Working on the train data
     '''
+    # PER LOGISTIC METTO ZERO
+    y_set[np.argwhere(y_set == -1)] = 0
 
     x_set = np.delete(x_set, jet_num, axis=1)
 
@@ -127,41 +134,59 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     lambdas = []
     rmse_tr = []
     rmse_te = []
-    for lambda_ in range(0, 200, 10):
 
-        cross_tr, cross_te = lr_ridge_cross_val_demo_lambda_fixed(y_set, x_set, 4, lambda_/100)
+
+
+    for lambda_ in range(0, 100, 10):
+        #cross_tr, cross_te = lr_ridge_cross_val_demo_lambda_fixed(y_set, x_set, 4, lambda_/100) #qui
+        cross_tr, cross_te, weight = cross_validation_penalized_logistic(y_set, x_set, np.zeros(x_set.shape[1]), 0.5, 4, lambda_/100, 200, False)
         lambdas.append(lambda_/100)
-        rmse_tr.append(np.mean(cross_tr))
-        rmse_te.append(np.mean(cross_te))
+        rmse_te.append(cross_te)
+        #rmse_tr.append(np.sqrt(cross_tr))
+        #rmse_tr.append(np.mean(cross_tr))
+        #rmse_te.append(np.mean(cross_te))
+
+
 
     '''
     Plotting the errors from cross validation
+    
+    plt.figure()
+    ax = plt.subplot(111)
+    training_plot = ax.plot(lambdas, rmse_tr)
+    testing_plot = ax.plot(lambdas, rmse_te)
+    ax.set_xlabel("lambdas")
+    ax.set_ylabel("errors")
+    ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
+    plt.show()
+    plt.close()
     '''
-    # plt.figure()
-    # ax = plt.subplot(111)
-    # training_plot = ax.plot(lambdas, rmse_tr)
-    # testing_plot = ax.plot(lambdas, rmse_te)
-    # ax.set_xlabel("lambdas")
-    # ax.set_ylabel("errors")
-    # ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
-    # plt.show()
-    # plt.close()
 
     index = np.argmin(rmse_te)
     lambda_ = lambdas[index]
+    print("subset: ")
+    print(subset_index)
+    print("best_lambda")
+    print(lambda_)
 
-    losses, ws = ridge_regression(y_set, x_set, lambda_)
 
-    predictions.append(predict_labels(ws, x_set_test))
-    final_ids.append(ids_set_test)
+    #losses, ws = learning_with_penalized_logistic_gradient_desc(y_set, x_set, np.zeros(x_set.shape[1]), 0.5, lambda_, 300) #penalized
+    #losses, ws = ridge_regression(y_set, x_set, lambda_)
+    #predictions.append(predict_labels(ws, x_set_test))
+    #final_ids.append(ids_set_test)
 
-y_pred = np.concatenate(predictions)
-indices = np.concatenate(final_ids)
 
-print(y_pred.shape)
-print(indices.shape)
+end = time.time()
 
-create_csv_submission(indices, y_pred, "nan_clustering")
+print((end - start))
+
+#y_pred = np.concatenate(predictions)
+#indices = np.concatenate(final_ids)
+
+#print(y_pred.shape)
+#print(indices.shape)
+
+#create_csv_submission(indices, y_pred, "nan_clustering")
 
 
 
