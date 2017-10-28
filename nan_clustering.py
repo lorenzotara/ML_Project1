@@ -6,8 +6,8 @@ from helpers.proj1_helpers import *
 from matplotlib import pyplot as plt
 from helpers.logistic_helpers import *
 
-train_path = "data/train.csv"
-test_path = "data/test.csv"
+train_path = "Data/train.csv"
+test_path = "Data/test.csv"
 
 y, x, ids = load_csv_data(train_path)
 
@@ -70,18 +70,20 @@ final_ids = []
 start = time.time()
 subset_index = 0
 for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x, subsets_y, subsets_ids, subsets_x_test, subsets_y_test, subsets_ids_test):
-    subset_index += 1
+
     '''
     Working on the train data
     '''
     # PER LOGISTIC METTO ZERO
     y_set[np.argwhere(y_set == -1)] = 0
 
+    # centrality_set = [x_set[v, 12] + 0.5 for v in range(len(x_set[:, 12]))]
+
     x_set = np.delete(x_set, jet_num, axis=1)
 
     x_set = delete_bad_columns(x_set)
     x_set = delete_equal_columns(x_set)
-    x_set = replace_wrong_data(x_set)
+    x_set = linear_interpolation(x_set)
     # x_combined = combine_features(x_set, np.arange(13))
     # x_set = features_standardization(x_set)
     pca, eig_ratios = PCA(features_standardization(x_set), 14)
@@ -98,17 +100,20 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     x_set[:, 1:len(x_set)] = features_standardization(x_set[:, 1:len(x_set)])
 
     x_set = np.c_[x_set, pca]
+    # x_set = np.c_[x_set, centrality_set]
     # x_set = np.c_[x_set, x_combined]
 
     '''
     Working on the test data
     '''
 
+    # centrality_test = [x_set_test[v, 12] + 0.5 for v in range(len(x_set_test[:, 12]))]
+
     x_set_test = np.delete(x_set_test, jet_num, axis=1)
 
     x_set_test = delete_bad_columns(x_set_test)
     x_set_test = delete_equal_columns(x_set_test)
-    x_set_test = replace_wrong_data(x_set_test)
+    x_set_test = linear_interpolation(x_set_test)
 
     pca_test, eig_ratios_test = PCA(features_standardization(x_set_test), 14)
 
@@ -124,6 +129,7 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     x_set_test[:, 1:len(x_set_test)] = features_standardization(x_set_test[:, 1:len(x_set_test)])
 
     x_set_test = np.c_[x_set_test, pca_test]
+    # x_set_test = np.c_[x_set_test, centrality_test]
 
 
     '''
@@ -150,17 +156,16 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
 
     '''
     Plotting the errors from cross validation
-    
-    plt.figure()
-    ax = plt.subplot(111)
-    training_plot = ax.plot(lambdas, rmse_tr)
-    testing_plot = ax.plot(lambdas, rmse_te)
-    ax.set_xlabel("lambdas")
-    ax.set_ylabel("errors")
-    ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
-    plt.show()
-    plt.close()
     '''
+    # plt.figure()
+    # ax = plt.subplot(111)
+    # training_plot = ax.plot(lambdas, rmse_tr)
+    # testing_plot = ax.plot(lambdas, rmse_te)
+    # ax.set_xlabel("lambdas")
+    # ax.set_ylabel("errors")
+    # ax.legend((training_plot[0], testing_plot[0]), ("training error", "testing error"))
+    # plt.show()
+    # plt.close()
 
     index = np.argmin(rmse_te)
     lambda_ = lambdas[index]
@@ -169,12 +174,13 @@ for x_set, y_set, ids_set, x_set_test, y_set_test, ids_set_test in zip(subsets_x
     print("best_lambda")
     print(lambda_)
 
+    losses, ws = ridge_regression(y_set, x_set, lambda_)
 
-    #losses, ws = learning_with_penalized_logistic_gradient_desc(y_set, x_set, np.zeros(x_set.shape[1]), 0.5, lambda_, 300) #penalized
-    #losses, ws = ridge_regression(y_set, x_set, lambda_)
-    #predictions.append(predict_labels(ws, x_set_test))
-    #final_ids.append(ids_set_test)
+    predictions.append(predict_labels(ws, x_set_test))
+    final_ids.append(ids_set_test)
 
+y_pred = np.concatenate(predictions)
+indices = np.concatenate(final_ids)
 
 end = time.time()
 

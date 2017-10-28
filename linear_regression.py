@@ -41,7 +41,7 @@ calculated without taking account of wrong data
 
 '''
 
-x = replace_wrong_data(x)
+x = replace_wrong_data_mean(x)
 
 x_sin = np.sin(x)
 x_cos = np.cos(x)

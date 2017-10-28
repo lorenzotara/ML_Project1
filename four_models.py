@@ -120,7 +120,7 @@ for x_elem, y_elem in zip(x_list, y_list):
     x_elem = np.delete(x_elem, jet_num, axis=1)
 
     x_elem = delete_bad_columns(x_elem)
-    x_elem = replace_wrong_data(x_elem)
+    x_elem = replace_wrong_data_mean(x_elem)
     x_elem = combine_features(x_elem, np.arange(13))
     x_elem = build_poly(x_elem, 3)
     x_elem = add_column_of_ones(x_elem)

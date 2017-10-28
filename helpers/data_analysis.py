@@ -178,7 +178,6 @@ def outliers_modified_z_score(xs):
         #     xs[j, i] = np.mean(temp)
     return xs
 
-
 def distribution_histogram(x):
     titles = np.array(['DER_mass_MMC', 'DER_mass_transverse_met_lep',
                        'DER_mass_vis', 'DER_pt_h', 'DER_deltaeta_jet_jet', 'DER_mass_jet_jet',
@@ -276,10 +275,25 @@ def visualization_PCA(eig_ratios):
     plt.show()
 
 
-def fourier(x):
+def nan_helper(y):
+    """Helper to handle indices and logical indices of NaNs.
+    Input:
+        - y, 1d numpy array with possible NaNs
+    Output:
+        - nans, logical indices of NaNs
+        - index, a function, with signature indices= index(logical_indices),
+          to convert logical indices of NaNs to 'equivalent' indices
+    """
+    # print(y==-999)
+    return y==-999, lambda z: z.nonzero()[0]
 
-    temp = x
-    for i in range(x.shape[1]):
-        temp[:, i] = np.fft.fft(x[:, i])
 
-    return temp
+def linear_interpolation(x):
+    '''linear interpolation of NaNs'''
+
+    new_x = x
+    nans, indices = nan_helper(x[:, 0])
+
+    new_x[:, 0][nans] = np.interp(indices(nans), indices(~nans), x[:, 0][~nans])
+
+    return new_x
