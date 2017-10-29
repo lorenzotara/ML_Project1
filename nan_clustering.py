@@ -186,13 +186,13 @@ end = time.time()
 
 print((end - start))
 
-#y_pred = np.concatenate(predictions)
-#indices = np.concatenate(final_ids)
+# y_pred = np.concatenate(predictions)
+# indices = np.concatenate(final_ids)
 
-#print(y_pred.shape)
-#print(indices.shape)
+# print(y_pred.shape)
+# print(indices.shape)
 
-#create_csv_submission(indices, y_pred, "nan_clustering")
+# create_csv_submission(indices, y_pred, "nan_clustering")
 
 
 
